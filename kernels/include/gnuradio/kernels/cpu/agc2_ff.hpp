@@ -14,10 +14,12 @@ namespace cpu {
  *
  *
  */
-struct agc_ff : stateful_kernel_interface {
+struct agc2_ff : stateful_kernel_interface {
 public:
-    agc_ff(float rate, float reference, float gain, float max_gain)
-        : _rate(rate),
+    agc2_ff(
+        float attack_rate, float decay_rate, float reference, float gain, float max_gain)
+        : _attack_rate(attack_rate),
+          _decay_rate(decay_rate),
           _reference(reference),
           _gain(gain),
           _default_gain(gain),
@@ -31,7 +33,8 @@ public:
     void reset() { _gain = _default_gain; };
 
 protected:
-    float _rate;         // adjustment rate
+    float _attack_rate; // adjustment rate
+    float _decay_rate;
     float _reference;    // reference value
     float _gain;         // current gain
     float _default_gain; // default gain when re-setting

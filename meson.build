@@ -23,9 +23,8 @@ cuda_dep = dependency('cuda', version : '>=10.1', required : cuda_available and 
 flatc = find_program('flatc', version : '>=1.12')
 
 subdir('kernels')
-
-subdir('pmt')
-subdir('runtime')
-subdir('blocklib')
-subdir('schedulers')
-subdir('docs')
+# subdir('pmt')
+# subdir('runtime')
+# subdir('blocklib')
+# subdir('schedulers')
+# subdir('docs')

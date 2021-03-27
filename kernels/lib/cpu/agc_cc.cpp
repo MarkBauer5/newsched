@@ -10,10 +10,12 @@ void agc_cc::operator()(void* in_buffer, void* out_buffer, size_t num_items)
 {
     std::complex<float>* in = reinterpret_cast<std::complex<float>*>(in_buffer);
     std::complex<float>* out = reinterpret_cast<std::complex<float>*>(out_buffer);
-    for (unsigned int i = 0; i < num_items; i++) {
-        out[i] = in[i] * _gain;
-        _gain += _rate * (_reference - std::sqrt(out[i].real() * out[i].real() +
-                                                 out[i].imag() * out[i].imag()));
+
+
+    for (unsigned int idx = 0; idx < num_items; idx++) {
+        out[idx] = in[idx] * _gain;
+        _gain += _rate * (_reference - std::sqrt(out[idx].real() * out[idx].real() +
+                                                 out[idx].imag() * out[idx].imag()));
         if (_max_gain > 0.0 && _gain > _max_gain)
             _gain = _max_gain;
     }
