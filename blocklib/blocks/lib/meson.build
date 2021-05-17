@@ -10,10 +10,7 @@ blocks_sources = [
     'vector_source.cpp'
 ]
 
-<<<<<<< HEAD
-=======
 incdir = include_directories(['../include/gnuradio/blocks','../include'])
->>>>>>> master
 newsched_blocklib_blocks_lib = library('newsched-blocklib-blocks', 
     blocks_sources, 
     include_directories : incdir, 

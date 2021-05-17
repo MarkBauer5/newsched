@@ -234,7 +234,6 @@ newsched_runtime_lib = library('newsched-runtime',
     dependencies : [runtime_deps, newsched_kernels_cpu_dep],
     link_language : 'cpp',
     include_directories : incdir,
-<<<<<<< HEAD
     cpp_args : cpp_args
   )
 
@@ -243,10 +242,3 @@ newsched_runtime_dep = declare_dependency(
   dependencies: [runtime_deps, newsched_kernels_cpu_dep],
   link_with : newsched_runtime_lib
 )
-=======
-    cpp_args : cpp_args)
-
-newsched_runtime_dep = declare_dependency(include_directories : incdir,
-					  #  dependencies: runtime_deps, // have to disable this for blocklib_blocks_cuda_cu to link
-					   link_with : newsched_runtime_lib)
->>>>>>> master

@@ -104,12 +104,6 @@ public:
 
     void set_scheduler(std::shared_ptr<scheduler> sched) { p_scheduler = sched; }
 
-<<<<<<< HEAD
-    /**
-     * A kernel to be swapped at run-time
-     */
-    gr::kernels::kernel_interface* block_kernel;
-=======
     void consume_each(int num, std::vector<block_work_input>& work_input)
     {
         for (auto& input : work_input) {
@@ -137,7 +131,6 @@ public:
 
     void set_relative_rate(double relative_rate) { d_relative_rate = relative_rate; }
     double relative_rate() const { return d_relative_rate; }
->>>>>>> master
 
     gpdict attributes; // this is a HACK for storing metadata.  Needs to go.
 };
