@@ -8,16 +8,7 @@ namespace kernels {
 namespace analog {
 namespace cpu {
 
-/**
- * @brief high performance Automatic Gain Control class with
- * attack and decay rates.
- *
- * @ingroup level_controllers_blk
- *
- * @details For Power the absolute value of the complex number is used.
- *
- */
-struct agc_cc : kernel_interface {
+struct agc_cc : stateful_kernel_interface {
 public:
     /**
      * @brief Build a complex value AGC loop block with attack and decay rates.
@@ -28,19 +19,25 @@ public:
      * @param max_gain maximum gain.
      */
     agc_cc(float rate, float reference, float gain, float max_gain)
-        : _rate(rate), _reference(reference), _gain(gain), _max_gain(max_gain){};
+        : _rate(rate),
+          _reference(reference),
+          _gain(gain),
+          _default_gain(gain),
+          _max_gain(max_gain){};
 
     void operator()(void* in_buffer, void* out_buffer, size_t num_items);
     void operator()(void* buffer, size_t num_items)
     {
         operator()(buffer, buffer, num_items);
     }
+    void reset() { _gain = _default_gain; };
 
 protected:
-    float _rate;
-    float _reference;
-    float _gain;
-    float _max_gain;
+    float _rate;         // adjustment rate
+    float _reference;    // reference value
+    float _gain;         // current gain
+    float _default_gain; // default gain when re-setting
+    float _max_gain;     // max allowable gain
 };
 
 } // namespace cpu

@@ -24,7 +24,7 @@ public:
     {
         return std::make_shared<pmt_string>(buf);
     }
-    static sptr from_pmt(const pmtf::Pmt *fb_pmt)
+    static sptr from_pmt(const pmtf::Pmt* fb_pmt)
     {
         return std::make_shared<pmt_string>(fb_pmt);
     }
@@ -45,7 +45,7 @@ public:
 
     pmt_string(const std::string& val);
     pmt_string(const uint8_t* buf);
-    pmt_string(const pmtf::Pmt *fb_pmt);
+    pmt_string(const pmtf::Pmt* fb_pmt);
 };
 
 

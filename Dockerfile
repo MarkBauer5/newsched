@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -yq \
     curl \
     cmake \
     pkg-config \
+    clang-format \
+    git-core \
     libfmt-dev
 
 RUN pip3 install \
@@ -30,6 +32,18 @@ RUN mkdir -p volk && \
     cd build && \
     cmake --build . && \
     cmake --build . --target install && \
+    ldconfig && \
+    cd ../ && \
+    rm -rf build
+
+RUN mkdir -p flatbuffers && \
+    git clone --depth 1 --branch v1.12.0 https://github.com/google/flatbuffers.git && \
+    cd flatbuffers && \
+    mkdir build && \
+    cd build && \
+    cmake ../ -DCMAKE_BUILD_TYPE=Release && \
+    make -j${nproc} && \
+    make install && \
     ldconfig && \
     cd ../ && \
     rm -rf build

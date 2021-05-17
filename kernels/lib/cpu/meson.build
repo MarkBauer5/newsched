@@ -8,6 +8,7 @@ srcs = [
     'agc_ff.cpp',
     'agc_cc.cpp',
     'agc2_ff.cpp',
+    'agc2_cc.cpp',
     'copy.cpp'
 ]
 
@@ -15,10 +16,11 @@ newsched_kernels_cpu = library('newsched-kernels-cpu',
     srcs, 
     include_directories : incdir, 
     install : true, 
-    dependencies : []
+    dependencies : [volk_dep]
 )
 
 newsched_kernels_cpu_dep = declare_dependency(
     include_directories : incdir, 
-    link_with : newsched_kernels_cpu
+    link_with : newsched_kernels_cpu,
+    dependencies: [volk_dep]
 )

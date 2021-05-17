@@ -1,6 +1,5 @@
 #include <gnuradio/kernels/cpu/agc2_ff.hpp>
 #include <cmath>
-#include <iostream>
 
 namespace gr {
 namespace kernels {
@@ -28,7 +27,8 @@ void agc2_ff::operator()(void* in_buffer, void* out_buffer, size_t num_items)
         // Clip the gain at _max_gain
         _gain = _gain > _max_gain ? _max_gain : _gain;
 
-        std::cout << (_gain > _max_gain ? "Hit max gain" : "Not saturated.") << std::endl;
+        // std::cout << (_gain > _max_gain ? "Hit max gain" : "Not saturated.") <<
+        // std::endl;
     }
 }
 

@@ -44,7 +44,19 @@ struct kernel_interface {
 };
 
 /**
- * @brief An interface for all kernels to implement
+ * @brief An interface for kernels that are stateful
+ *
+ */
+struct stateful_kernel_interface : kernel_interface {
+    /**
+     * @brief Resets internal state to defaults
+     *
+     */
+    virtual void reset() = 0;
+};
+
+/**
+ * @brief An interface for kernels that have rate changes to implement
  *
  */
 struct multi_rate_kernel_interface : kernel_interface {
@@ -54,9 +66,13 @@ struct multi_rate_kernel_interface : kernel_interface {
      *
      * @param in_buffer
      * @param out_buffer
-     * @param num_items
+     * @param num_input_items
+     * @param num_output_items
      */
-    virtual void operator()(void* in_buffer, void* out_buffer, size_t num_items) = 0;
+    virtual void operator()(void* in_buffer,
+                            void* out_buffer,
+                            size_t num_input_items,
+                            size_t num_output_items) = 0;
 };
 
 

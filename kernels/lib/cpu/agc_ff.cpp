@@ -10,6 +10,7 @@ void agc_ff::operator()(void* in_buffer, void* out_buffer, size_t num_items)
 {
     float* in = reinterpret_cast<float*>(in_buffer);
     float* out = reinterpret_cast<float*>(out_buffer);
+
     for (unsigned int i = 0; i < num_items; i++) {
         out[i] = in[i] * _gain;
         _gain += (_reference - fabsf(out[i])) * _rate;

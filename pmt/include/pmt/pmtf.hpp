@@ -19,7 +19,8 @@ public:
     virtual ~pmt_base() {}
 
     Data data_type() const { return _data_type; };
-    virtual flatbuffers::Offset<void> rebuild_data(flatbuffers::FlatBufferBuilder& fbb) = 0;
+    virtual flatbuffers::Offset<void>
+    rebuild_data(flatbuffers::FlatBufferBuilder& fbb) = 0;
 
     bool serialize(std::streambuf& sb)
     {
@@ -29,7 +30,7 @@ public:
     }
 
     static sptr from_buffer(const uint8_t* buf, size_t size);
-    static sptr from_pmt(const pmtf::Pmt *fb_pmt);
+    static sptr from_pmt(const pmtf::Pmt* fb_pmt);
     static sptr deserialize(std::streambuf& sb)
     {
         char buf[4];
@@ -68,13 +69,13 @@ public:
     uint8_t* buffer_pointer() const
     {
         if (_vec_buf.size() > 0) {
-            return (uint8_t *)&_vec_buf[0];
+            return (uint8_t*)&_vec_buf[0];
         } else {
             return _fbb.GetBufferPointer();
         }
     }
 
-    void set_buffer(const uint8_t *data, size_t len)
+    void set_buffer(const uint8_t* data, size_t len)
     {
         _vec_buf.resize(len);
         memcpy(&_vec_buf[0], data, len);
@@ -96,7 +97,8 @@ protected:
     flatbuffers::Offset<Pmt> _blob;
     const pmtf::Pmt* _pmt_fb = nullptr;
     const uint8_t* _buf = nullptr;
-    std::vector<uint8_t> _vec_buf; // if the buffer came from serialized data, just store that here
+    std::vector<uint8_t>
+        _vec_buf; // if the buffer came from serialized data, just store that here
 
     // PmtBuilder _builder;
 };
