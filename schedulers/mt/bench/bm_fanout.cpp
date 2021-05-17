@@ -2,11 +2,10 @@
 #include <iostream>
 #include <thread>
 
-#include <gnuradio/blocklib/blocks/copy.hpp>
-#include <gnuradio/blocklib/blocks/head.hpp>
-#include <gnuradio/blocklib/blocks/null_sink.hpp>
-#include <gnuradio/blocklib/blocks/null_source.hpp>
-#include <gnuradio/domain_adapter_direct.hpp>
+#include <gnuradio/blocks/copy.hpp>
+#include <gnuradio/blocks/head.hpp>
+#include <gnuradio/blocks/null_sink.hpp>
+#include <gnuradio/blocks/null_source.hpp>
 #include <gnuradio/flowgraph.hpp>
 #include <gnuradio/realtime.hpp>
 #include <gnuradio/schedulers/mt/scheduler_mt.hpp>
@@ -83,7 +82,6 @@ int main(int argc, char* argv[])
             }
         }
 
-        std::cout << "no domain adapters" << std::endl;
         auto sched1 = schedulers::scheduler_mt::make("sched1");
         fg->add_scheduler(sched1);
         fg->validate();

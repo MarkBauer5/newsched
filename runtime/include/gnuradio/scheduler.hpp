@@ -28,8 +28,7 @@ public:
     };
     virtual ~scheduler() {}
     std::shared_ptr<scheduler> base() { return shared_from_this(); }
-    virtual void initialize(flat_graph_sptr fg, flowgraph_monitor_sptr fgmon,
-               neighbor_interface_map scheduler_adapter_map = neighbor_interface_map()) = 0;
+    virtual void initialize(flat_graph_sptr fg, flowgraph_monitor_sptr fgmon) = 0;
     virtual void push_message(scheduler_message_sptr msg) = 0;
     virtual void start() = 0;
     virtual void stop() = 0;
@@ -40,10 +39,9 @@ public:
     void set_id(int id) { _id = id; }
 
     virtual void
-    set_default_buffer_factory(const buffer_factory_function& bff,
+    set_default_buffer_factory(
                                std::shared_ptr<buffer_properties> bp = nullptr)
     {
-        _default_buf_factory = bff;
         _default_buf_properties = bp;
     }
 
@@ -51,7 +49,6 @@ protected:
     logger_sptr _logger;
     logger_sptr _debug_logger;
 
-    buffer_factory_function _default_buf_factory = nullptr;
     std::shared_ptr<buffer_properties> _default_buf_properties = nullptr;
 
 private:

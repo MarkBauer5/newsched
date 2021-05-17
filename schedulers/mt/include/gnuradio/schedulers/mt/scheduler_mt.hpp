@@ -1,11 +1,10 @@
+#include <gnuradio/block_group_properties.hpp>
 #include <gnuradio/domain.hpp>
 #include <gnuradio/graph_utils.hpp>
 #include <gnuradio/scheduler.hpp>
 #include <gnuradio/vmcircbuf.hpp>
 
-#include "block_group_properties.hpp"
 #include "thread_wrapper.hpp"
-
 namespace gr {
 namespace schedulers {
 class scheduler_mt : public scheduler
@@ -27,7 +26,6 @@ public:
                  const unsigned int fixed_buf_size = 32768)
         : scheduler(name), s_fixed_buf_size(fixed_buf_size)
     {
-        _default_buf_factory = vmcirc_buffer::make;
         _default_buf_properties =
             vmcirc_buffer_properties::make(vmcirc_buffer_type::AUTO);
     }
@@ -49,28 +47,11 @@ public:
      * @param block_sched_map for each block in this flowgraph, a map of neighboring
      * schedulers
      */
-    void initialize(flat_graph_sptr fg,
-                    flowgraph_monitor_sptr fgmon,
-                    neighbor_interface_map block_sched_map);
+    void initialize(flat_graph_sptr fg, flowgraph_monitor_sptr fgmon);
     void start();
     void stop();
     void wait();
     void run();
-
-private:
-    /**
-     * @brief Append domain adapters to connected block
-     *
-     * Domain adapters don't show up as blocks, so make sure they get added into the
-     * partition configuration
-     *
-     * @param b block sptr
-     * @param fg flowgraph to search edges
-     * @param node_vec output node vector that the block and associated domain adapters
-     * will be appended to
-     */
-    void
-    append_domain_adapters(block_sptr b, flat_graph_sptr fg, node_vector_t& node_vec);
 };
 } // namespace schedulers
 } // namespace gr

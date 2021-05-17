@@ -6,17 +6,16 @@
 namespace gr {
 namespace blocks {
 
-class nop_source : virtual public sync_block
+class null_source : virtual public sync_block
 {
 
 public:
     enum params : uint32_t { id_itemsize, id_nports, num_params };
 
-    typedef std::shared_ptr<nop_source> sptr;
+    typedef std::shared_ptr<null_source> sptr;
     static sptr make(size_t itemsize, size_t nports = 1)
     {
-
-        auto ptr = std::make_shared<nop_source>(itemsize, nports);
+        auto ptr = std::make_shared<null_source>(itemsize, nports);
 
         // TODO : do this with multiplicity
         for (size_t i = 0; i < nports; i++) {
@@ -28,18 +27,18 @@ public:
         return ptr;
     }
 
-    nop_source(size_t itemsize, size_t nports) : sync_block("nop_source"), _itemsize(itemsize), _nports(nports) {}
-    // ~nop_source() {};
+    null_source(size_t itemsize, size_t nports) : sync_block("null_source"), _itemsize(itemsize), _nports(nports) {}
+    // ~null_source() {};
 
     virtual work_return_code_t work(std::vector<block_work_input>& work_input,
                                     std::vector<block_work_output>& work_output)
     {
-        // void* optr;
+        void* optr;
 
         for (size_t n = 0; n < work_output.size(); n++) {
-        //     optr = work_output[n].buffer->write_ptr();
+            optr = work_output[n].items();
             auto noutput_items = work_output[n].n_items;
-        //     memset(optr, 0, noutput_items * _itemsize);
+            memset(optr, 0, noutput_items * _itemsize);
             work_output[n].n_produced = noutput_items;
         }
 

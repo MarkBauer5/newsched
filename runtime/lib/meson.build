@@ -15,7 +15,7 @@ if cuda_dep.found() and get_option('enable_cuda')
       cu_sources, 
       cuda_args: ['-DTAG_IS_SHARED=1', '-DTAG_IS_BUILDING=1'],
       install : true, 
-      dependencies : [cuda_dep],
+      dependencies : [cuda_dep, pmtf_dep],
       include_directories : incdir)
 
   newsched_runtime_cu_dep = declare_dependency(include_directories : incdir,
@@ -25,6 +25,9 @@ if cuda_dep.found() and get_option('enable_cuda')
 endif
 
 runtime_sources = [
+  'buffer.cpp',
+  'buffer_management.cpp',
+  'simplebuffer.cpp',
   'realtime.cpp',
   'thread.cpp',
   'parameter_types.cpp',
@@ -231,6 +234,7 @@ newsched_runtime_lib = library('newsched-runtime',
     dependencies : [runtime_deps, newsched_kernels_cpu_dep],
     link_language : 'cpp',
     include_directories : incdir,
+<<<<<<< HEAD
     cpp_args : cpp_args
   )
 
@@ -239,3 +243,10 @@ newsched_runtime_dep = declare_dependency(
   dependencies: [runtime_deps, newsched_kernels_cpu_dep],
   link_with : newsched_runtime_lib
 )
+=======
+    cpp_args : cpp_args)
+
+newsched_runtime_dep = declare_dependency(include_directories : incdir,
+					  #  dependencies: runtime_deps, // have to disable this for blocklib_blocks_cuda_cu to link
+					   link_with : newsched_runtime_lib)
+>>>>>>> master
