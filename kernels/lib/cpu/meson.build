@@ -9,6 +9,7 @@ srcs = [
     'agc_cc.cpp',
     'agc2_ff.cpp',
     'agc2_cc.cpp',
+    'agc3_cc.cpp',
     'copy.cpp'
 ]
 

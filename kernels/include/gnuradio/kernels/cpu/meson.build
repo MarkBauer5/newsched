@@ -3,6 +3,7 @@ headers = [
     'agc_cc.hpp',
     'agc2_ff.hpp',
     'agc2_cc.hpp',
+    'agc3_cc.hpp',
     'copy.hpp'
 ]
 

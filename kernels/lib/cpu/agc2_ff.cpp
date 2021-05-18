@@ -1,5 +1,6 @@
 #include <gnuradio/kernels/cpu/agc2_ff.hpp>
 #include <cmath>
+#include <iostream>
 
 namespace gr {
 namespace kernels {
@@ -11,10 +12,10 @@ void agc2_ff::operator()(void* in_buffer, void* out_buffer, size_t num_items)
     float* in = reinterpret_cast<float*>(in_buffer);
     float* out = reinterpret_cast<float*>(out_buffer);
 
-    for (unsigned int i = 0; i < num_items; i++) {
-        out[i] = in[i] * _gain;
+    for (unsigned int idx = 0; idx < num_items; idx++) {
+        out[idx] = in[idx] * _gain;
 
-        float diff = fabsf(out[i]) - _reference;
+        float diff = fabsf(out[idx]) - _reference;
         float rate = fabsf(diff) > _gain ? _attack_rate : _decay_rate;
 
         // Adjust gain according to difference between signal level and reference
@@ -26,9 +27,6 @@ void agc2_ff::operator()(void* in_buffer, void* out_buffer, size_t num_items)
 
         // Clip the gain at _max_gain
         _gain = _gain > _max_gain ? _max_gain : _gain;
-
-        // std::cout << (_gain > _max_gain ? "Hit max gain" : "Not saturated.") <<
-        // std::endl;
     }
 }
 

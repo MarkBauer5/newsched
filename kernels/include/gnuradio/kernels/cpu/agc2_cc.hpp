@@ -9,13 +9,24 @@ namespace analog {
 namespace cpu {
 
 /**
- * @brief Automatic Gain Control
- * \ingroup level_controllers
+ * @brief Automatic Gain Control class with attack and decay rates.
  *
+ * @ingroup level_controllers
+ *
+ * @details For Power the absolute value of the complex number is used.
  *
  */
 struct agc2_cc : stateful_kernel_interface {
 public:
+    /**
+     * @brief Construct a new agc2 cc object
+     *
+     * @param attack_rate
+     * @param decay_rate
+     * @param reference
+     * @param gain
+     * @param max_gain
+     */
     agc2_cc(
         float attack_rate, float decay_rate, float reference, float gain, float max_gain)
         : _attack_rate(attack_rate),
@@ -33,12 +44,12 @@ public:
     void reset() { _gain = _default_gain; };
 
 protected:
-    float _attack_rate; // adjustment rate
+    float _attack_rate;
     float _decay_rate;
-    float _reference;    // reference value
-    float _gain;         // current gain
-    float _default_gain; // default gain when re-setting
-    float _max_gain;     // max allowable gain
+    float _reference;
+    float _gain;
+    float _default_gain;
+    float _max_gain;
 };
 
 } // namespace cpu

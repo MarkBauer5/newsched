@@ -11,12 +11,12 @@ namespace cpu {
 /**
  * @brief Automatic Gain Control class with attack and decay rates.
  *
- * @ingroup level_controllers_blk
+ * @ingroup level_controllers
  *
  * @details For Power the absolute value of the complex number is used.
  *
  */
-struct agc2_ff : kernel_interface {
+struct agc2_ff : stateful_kernel_interface {
 public:
     /**
      * @brief Construct a new agc2 ff object
@@ -33,6 +33,7 @@ public:
           _decay_rate(decay_rate),
           _reference(reference),
           _gain(gain),
+          _default_gain(gain),
           _max_gain(max_gain){};
 
     void operator()(void* in_buffer, void* out_buffer, size_t num_items);
@@ -40,12 +41,14 @@ public:
     {
         operator()(buffer, buffer, num_items);
     };
+    void reset() { _gain = _default_gain; };
 
 protected:
     float _attack_rate;
     float _decay_rate;
     float _reference;
     float _gain;
+    float _default_gain;
     float _max_gain;
 };
 
