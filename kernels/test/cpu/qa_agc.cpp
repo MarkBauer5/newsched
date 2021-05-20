@@ -1,5 +1,6 @@
 #include <gnuradio/kernels/cpu/agc2_cc.hpp>
 #include <gnuradio/kernels/cpu/agc2_ff.hpp>
+#include <gnuradio/kernels/cpu/agc3_cc.hpp>
 #include <gnuradio/kernels/cpu/agc_cc.hpp>
 #include <gnuradio/kernels/cpu/agc_ff.hpp>
 #include <gtest/gtest.h>
@@ -287,4 +288,26 @@ TEST(AnalogKernel, agc2_complex_decay_test)
         EXPECT_NEAR(output[idx].real(), expected_output[idx].real(), .0001f);
         EXPECT_NEAR(output[idx].imag(), expected_output[idx].imag(), .0001f);
     }
+}
+
+TEST(AnalogKernel, agc3_complex_identity_test)
+{
+    auto agc_kernel = analog::agc3_cc(.001f, .1f, 1.0f, 1.0f, 25, 4);
+    std::complex<float> input[100];
+    std::complex<float> output[100];
+    std::complex<float> expected_output[100];
+
+    for (unsigned int idx = 0; idx < 100; idx++) {
+        input[idx] = std::complex<float>(.25f, .25f);
+        output[idx] = std::complex<float>(1.0f, 0.0f);
+        expected_output[idx] = std::complex<float>(1.0f, 0.0f);
+    }
+
+    agc_kernel(input, output, 100);
+
+    std::cout << "Test";
+    // for (unsigned int idx = 0; idx < 100; idx++) {
+    //     EXPECT_NEAR(output[idx].real(), expected_output[idx].real(), .0001f);
+    //     EXPECT_NEAR(output[idx].imag(), expected_output[idx].imag(), .0001f);
+    // }
 }

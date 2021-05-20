@@ -39,7 +39,7 @@ public:
     {
         operator()(buffer, buffer, num_items);
     };
-    void reset(){};
+    void reset();
     float get_initial_gain();
 
     typedef enum state_enum { WARMUP, IIR } state_t;

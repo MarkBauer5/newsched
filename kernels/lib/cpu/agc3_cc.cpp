@@ -68,7 +68,6 @@ void agc3_cc::operator()(void* in_buffer, void* out_buffer, size_t num_items)
     std::complex<float>* out = reinterpret_cast<std::complex<float>*>(out_buffer);
 
     bool warmup_done = false;
-    unsigned int num_samples_left = 0;
     if (_state == state_t::WARMUP) {
         // determine how many samples are available versus how many I need to
         // leave "warmup"
@@ -85,19 +84,23 @@ void agc3_cc::operator()(void* in_buffer, void* out_buffer, size_t num_items)
 
         // Calculate initial gain and start to IIR.
         warmup_done = num_need_samples < num_items;
-        num_items -= num_copy_samples;
-        _num_warmup_processed += warmup_done ? num_copy_samples : 0;
-        _state = warmup_done ? state_t::WARMUP : state_t::IIR;
-        _gain = warmup_done ? 1.0f : get_initial_gain();
-
-        if (!warmup_done)
+        _num_warmup_processed += num_copy_samples;
+        if (warmup_done) {
+            in += num_copy_samples;
+            num_items -= num_copy_samples;
+            _state = state_t::IIR;
+            _gain = get_initial_gain();
+        } else {
             return;
+        }
     }
 
+    // Do the single-pole IIR filtering with decimation on the magnitude
+    // and scale the output accordingly.
     unsigned int alignment = volk_get_alignment();
     float* magnitude_squared =
         reinterpret_cast<float*>(volk_malloc(num_items * sizeof(float), alignment));
-    float* inverse_sqrt =
+    float* inverse_mag =
         reinterpret_cast<float*>(volk_malloc(num_items * sizeof(float), alignment));
 
     // We cannot control the multiple of _iir_update_decim we get from client code,
@@ -110,28 +113,47 @@ void agc3_cc::operator()(void* in_buffer, void* out_buffer, size_t num_items)
         magnitude_squared[i] =
             in[idx].real() * in[idx].real() + in[idx].imag() * in[idx].imag();
     }
-    offset = _iir_update_decim - (num_items % _iir_update_decim);
 
-    // compute inverse square roots
-    volk_32f_invsqrt_32f(inverse_sqrt, magnitude_squared, num_items / _iir_update_decim);
+    // apply updates on first "offset" samples using previous gain
+    for (unsigned int idx = 0; idx < offset; idx++)
+        out[idx] = in[idx] * _gain;
 
-    // apply updates
-    for (int idx = 0; idx < num_items / _iir_update_decim; idx++) {
-        if (std::isfinite(inverse_sqrt[idx])) {
-            float rate =
-                (inverse_sqrt[idx] > _gain / _reference) ? _decay_rate : _attack_rate;
-            _gain = _gain * (1 - rate) + _reference * inverse_sqrt[idx] * rate;
+    // compute inverse square roots of the magnitude. In other words,
+    // the 1/magnitude
+    volk_32f_invsqrt_32f(inverse_mag, magnitude_squared, num_items / _iir_update_decim);
+
+    for (unsigned int decim_idx = 0; decim_idx < num_items / _iir_update_decim;
+         decim_idx++) {
+        if (std::isfinite(inverse_mag[decim_idx])) {
+            float rate = (inverse_mag[decim_idx] > _gain / _reference) ? _decay_rate
+                                                                       : _attack_rate;
+            _gain -= rate * (_gain - _reference * inverse_mag[decim_idx]);
         } else {
-            _gain = _gain * (1 - _decay_rate);
+            _gain -= _decay_rate * _gain;
         }
-        for (int j = idx * _iir_update_decim; j < (idx + 1) * _iir_update_decim; j++) {
-            out[j] = in[j] * _gain;
+
+        // Negative gain is prohibited
+        _gain = _gain < 0.0f ? 0.0f : _gain;
+
+        // Clip the gain at _max_gain
+        _gain = _gain > _max_gain ? _max_gain : _gain;
+
+        for (unsigned int sample_idx = 0; sample_idx < _iir_update_decim; sample_idx++) {
+            unsigned int idx = sample_idx + decim_idx * _iir_update_decim + offset;
+            out[idx] = in[idx] * _gain;
         }
     }
+
+    // Update offset according to how many items are left to be
+    // be adjusted
+    offset = _iir_update_decim - num_items % _iir_update_decim;
+
+    // Free the allocated arrays.
+    volk_free(magnitude_squared);
+    volk_free(inverse_mag);
 }
 
 } // namespace cpu
-
 } // namespace analog
 } // namespace kernels
 } // namespace gr
