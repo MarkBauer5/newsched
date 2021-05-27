@@ -13,6 +13,7 @@ cuda_available = add_languages('cuda', required : false)
 
 boost_dep = dependency('boost', modules : ['program_options'], version : '>=1.65')
 volk_dep = dependency('volk', version : '>=2.2')
+fftw3_dep = dependency('fftw3')
 yaml_dep = dependency('yaml-cpp', version : '>=0.6')
 fmt_dep = dependency('fmt', method: 'cmake', modules: ['fmt::fmt'])
 spdlog_dep = dependency('spdlog', method: 'cmake', modules : ['spdlog::spdlog'])

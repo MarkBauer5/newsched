@@ -17,11 +17,11 @@ newsched_kernels_cpu = library('newsched-kernels-cpu',
     srcs, 
     include_directories : incdir, 
     install : true, 
-    dependencies : [volk_dep]
+    dependencies : [volk_dep, fftw3_dep]
 )
 
 newsched_kernels_cpu_dep = declare_dependency(
     include_directories : incdir, 
     link_with : newsched_kernels_cpu,
-    dependencies: [volk_dep]
+    dependencies: [volk_dep, fftw3_dep]
 )
