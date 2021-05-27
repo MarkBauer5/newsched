@@ -56,6 +56,7 @@ protected:
     unsigned int _num_warmup_samples;
     unsigned int _num_warmup_processed;
     unsigned int _iir_update_decim;
+    unsigned int _offset;
     state_t _state;
 };
 

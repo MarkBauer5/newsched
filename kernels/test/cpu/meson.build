@@ -1,7 +1,7 @@
 incdir = include_directories('../../include')
 
 if get_option('enable_testing')
-    srcs = ['qa_agc.cpp']
+    srcs = ['qa_agc.cpp', 'qa_agc2.cpp', 'qa_agc3.cpp']
     e = executable('qa_agc', 
         srcs, 
         include_directories : incdir, 

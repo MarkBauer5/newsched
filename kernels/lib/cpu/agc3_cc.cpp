@@ -22,6 +22,8 @@ agc3_cc::agc3_cc(float attack_rate,
       _max_gain(max_gain),
       _num_warmup_samples(num_warmup_samples),
       _num_warmup_processed(0),
+      _offset(0),
+      _state(state_t::WARMUP),
       _iir_update_decim(iir_update_decim)
 {
     unsigned int alignment = volk_get_alignment();
@@ -36,6 +38,7 @@ void agc3_cc::reset()
 {
     _gain = 1.0;
     _num_warmup_processed = 0;
+    _offset = 0;
     _state = state_t::WARMUP;
 };
 
@@ -83,10 +86,10 @@ void agc3_cc::operator()(void* in_buffer, void* out_buffer, size_t num_items)
         std::memcpy(out, in, num_copy_samples);
 
         // Calculate initial gain and start to IIR.
-        warmup_done = num_need_samples < num_items;
         _num_warmup_processed += num_copy_samples;
-        if (warmup_done) {
+        if (num_items >= num_need_samples) {
             in += num_copy_samples;
+            out += num_copy_samples;
             num_items -= num_copy_samples;
             _state = state_t::IIR;
             _gain = get_initial_gain();
@@ -97,33 +100,30 @@ void agc3_cc::operator()(void* in_buffer, void* out_buffer, size_t num_items)
 
     // Do the single-pole IIR filtering with decimation on the magnitude
     // and scale the output accordingly.
+    unsigned int num_gain_updates = (num_items / _iir_update_decim) + 1;
     unsigned int alignment = volk_get_alignment();
-    float* magnitude_squared =
-        reinterpret_cast<float*>(volk_malloc(num_items * sizeof(float), alignment));
-    float* inverse_mag =
-        reinterpret_cast<float*>(volk_malloc(num_items * sizeof(float), alignment));
+    float* magnitude_squared = reinterpret_cast<float*>(
+        volk_malloc(num_gain_updates * sizeof(float), alignment));
+    float* inverse_mag = reinterpret_cast<float*>(
+        volk_malloc(num_gain_updates * sizeof(float), alignment));
 
-    // We cannot control the multiple of _iir_update_decim we get from client code,
-    // so we keep track of how many samples we processed last time.
-    static unsigned int offset = 0;
-
-    // generate squared magnitudes at decimated rate (gather operation)
-    for (int i = 0; i < num_items / _iir_update_decim; i++) {
-        int idx = i * _iir_update_decim + offset;
+    // generate squared magnitudes at decimated rate (gather operations
+    for (unsigned int i = 0; i < num_gain_updates; i++) {
+        unsigned int idx = i * _iir_update_decim + _offset;
         magnitude_squared[i] =
             in[idx].real() * in[idx].real() + in[idx].imag() * in[idx].imag();
     }
 
-    // apply updates on first "offset" samples using previous gain
-    for (unsigned int idx = 0; idx < offset; idx++)
+    // Use previous _gain on first set of samples using "offset"
+    for (unsigned int idx = 0; idx < (_iir_update_decim - _offset) % _iir_update_decim;
+         idx++)
         out[idx] = in[idx] * _gain;
 
     // compute inverse square roots of the magnitude. In other words,
     // the 1/magnitude
     volk_32f_invsqrt_32f(inverse_mag, magnitude_squared, num_items / _iir_update_decim);
 
-    for (unsigned int decim_idx = 0; decim_idx < num_items / _iir_update_decim;
-         decim_idx++) {
+    for (unsigned int decim_idx = 0; decim_idx < num_gain_updates; decim_idx++) {
         if (std::isfinite(inverse_mag[decim_idx])) {
             float rate = (inverse_mag[decim_idx] > _gain / _reference) ? _decay_rate
                                                                        : _attack_rate;
@@ -138,15 +138,19 @@ void agc3_cc::operator()(void* in_buffer, void* out_buffer, size_t num_items)
         // Clip the gain at _max_gain
         _gain = _gain > _max_gain ? _max_gain : _gain;
 
-        for (unsigned int sample_idx = 0; sample_idx < _iir_update_decim; sample_idx++) {
-            unsigned int idx = sample_idx + decim_idx * _iir_update_decim + offset;
+        unsigned int num_samples = decim_idx * (_iir_update_decim + 1) < num_items
+                                       ? _iir_update_decim
+                                       : num_items - (decim_idx * _iir_update_decim);
+
+        for (unsigned int sample_idx = 0; sample_idx < num_samples; sample_idx++) {
+            unsigned int idx = sample_idx + decim_idx * _iir_update_decim + _offset;
             out[idx] = in[idx] * _gain;
         }
     }
 
-    // Update offset according to how many items are left to be
-    // be adjusted
-    offset = _iir_update_decim - num_items % _iir_update_decim;
+    // Update offset according to how many items should not
+    // have their gains adjusted for the next call
+    _offset = num_items % _iir_update_decim;
 
     // Free the allocated arrays.
     volk_free(magnitude_squared);
